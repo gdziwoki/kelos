@@ -147,6 +147,8 @@ kubectl create secret generic github-app-creds \
 
 GitHub Apps are preferred over PATs for production use because they offer fine-grained permissions, higher rate limits, no dependency on a specific user account, and automatically expiring tokens.
 
+The installation token is minted to a per-task Secret (`<task-name>-github-token`) at admission and is mounted into the agent pod as a file at `/kelos/github-token/GITHUB_TOKEN`. While the task is running, the controller re-mints the token before it expires and updates the Secret in place. The kubelet syncs the file contents automatically, and the agent image's git credential helper and `gh` wrapper read the file on each invocation, so tasks that run longer than the ~1h installation-token TTL keep working without a pod restart.
+
 ## AgentConfig
 
 | Field | Description | Required |
