@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 	"github.com/kelos-dev/kelos/internal/githubapp"
 )
 
@@ -244,11 +245,11 @@ func (r *TaskReconciler) createJob(ctx context.Context, task *kelosv1alpha1.Task
 		}
 	}
 
-	var agentConfig *kelosv1alpha1.AgentConfigSpec
+	var agentConfig *kelosv1alpha2.AgentConfigSpec
 	if refs := ResolveAgentConfigRefs(&task.Spec); len(refs) > 0 {
-		var specs []kelosv1alpha1.AgentConfigSpec
+		var specs []kelosv1alpha2.AgentConfigSpec
 		for _, ref := range refs {
-			var ac kelosv1alpha1.AgentConfig
+			var ac kelosv1alpha2.AgentConfig
 			if err := r.Get(ctx, client.ObjectKey{
 				Namespace: task.Namespace,
 				Name:      ref.Name,
@@ -428,8 +429,8 @@ func (r *TaskReconciler) resolveGitHubAppToken(ctx context.Context, task *kelosv
 	return &resolved, nil
 }
 
-func (r *TaskReconciler) resolveMCPServerSecrets(ctx context.Context, namespace string, servers []kelosv1alpha1.MCPServerSpec) ([]kelosv1alpha1.MCPServerSpec, error) {
-	resolved := make([]kelosv1alpha1.MCPServerSpec, len(servers))
+func (r *TaskReconciler) resolveMCPServerSecrets(ctx context.Context, namespace string, servers []kelosv1alpha2.MCPServerSpec) ([]kelosv1alpha2.MCPServerSpec, error) {
+	resolved := make([]kelosv1alpha2.MCPServerSpec, len(servers))
 	for i, server := range servers {
 		resolved[i] = server
 
@@ -468,7 +469,7 @@ func (r *TaskReconciler) resolveMCPServerSecrets(ctx context.Context, namespace 
 // fetching the referenced Secret key or ConfigMap key. EnvFrom (whole-secret)
 // is then merged on top so its keys take precedence on collision, matching
 // the existing behaviour.
-func (r *TaskReconciler) resolveMCPServerEnv(ctx context.Context, namespace string, server kelosv1alpha1.MCPServerSpec) ([]corev1.EnvVar, error) {
+func (r *TaskReconciler) resolveMCPServerEnv(ctx context.Context, namespace string, server kelosv1alpha2.MCPServerSpec) ([]corev1.EnvVar, error) {
 	// Resolve inline Env entries into a map keyed by name so EnvFrom can
 	// override and so the final list has no duplicate names.
 	values := make(map[string]string, len(server.Env))

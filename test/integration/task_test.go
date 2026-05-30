@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 	"github.com/kelos-dev/kelos/internal/controller"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -305,13 +306,13 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, mcpSecret)).Should(Succeed())
 
 			By("Creating an AgentConfig with headersFrom")
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-headers-from-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name: "github",
 							Type: "http",
@@ -319,8 +320,8 @@ var _ = Describe("Task Controller", func() {
 							Headers: map[string]string{
 								"X-Inline": "inline-value",
 							},
-							HeadersFrom: &kelosv1alpha1.SecretValuesSource{
-								SecretRef: kelosv1alpha1.SecretReference{Name: "mcp-github-headers"},
+							HeadersFrom: &kelosv1alpha2.SecretValuesSource{
+								SecretRef: kelosv1alpha2.SecretReference{Name: "mcp-github-headers"},
 							},
 						},
 					},
@@ -410,13 +411,13 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, mcpSecret)).Should(Succeed())
 
 			By("Creating an AgentConfig with envFrom")
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-env-from-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name:    "local-db",
 							Type:    "stdio",
@@ -425,8 +426,8 @@ var _ = Describe("Task Controller", func() {
 							Env: []corev1.EnvVar{
 								{Name: "DSN", Value: "postgres://localhost/db"},
 							},
-							EnvFrom: &kelosv1alpha1.SecretValuesSource{
-								SecretRef: kelosv1alpha1.SecretReference{Name: "mcp-db-env"},
+							EnvFrom: &kelosv1alpha2.SecretValuesSource{
+								SecretRef: kelosv1alpha2.SecretReference{Name: "mcp-db-env"},
 							},
 						},
 					},
@@ -503,19 +504,19 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, apiSecret)).Should(Succeed())
 
 			By("Creating an AgentConfig with a missing MCP secret reference")
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-missing-secret-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name: "github",
 							Type: "http",
 							URL:  "https://api.example.com/mcp/",
-							HeadersFrom: &kelosv1alpha1.SecretValuesSource{
-								SecretRef: kelosv1alpha1.SecretReference{Name: "missing-secret"},
+							HeadersFrom: &kelosv1alpha2.SecretValuesSource{
+								SecretRef: kelosv1alpha2.SecretReference{Name: "missing-secret"},
 							},
 						},
 					},
@@ -594,13 +595,13 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, mcpSecret)).Should(Succeed())
 
 			By("Creating an AgentConfig with overlapping inline and secret values")
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-precedence-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name: "github",
 							Type: "http",
@@ -609,8 +610,8 @@ var _ = Describe("Task Controller", func() {
 								"Authorization": "Bearer inline-token",
 								"X-Inline":      "preserved",
 							},
-							HeadersFrom: &kelosv1alpha1.SecretValuesSource{
-								SecretRef: kelosv1alpha1.SecretReference{Name: "mcp-precedence-headers"},
+							HeadersFrom: &kelosv1alpha2.SecretValuesSource{
+								SecretRef: kelosv1alpha2.SecretReference{Name: "mcp-precedence-headers"},
 							},
 						},
 					},
@@ -710,13 +711,13 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, hostCM)).Should(Succeed())
 
 			By("Creating an AgentConfig with env.valueFrom")
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-value-from-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name:    "local-db",
 							Type:    "stdio",
@@ -812,13 +813,13 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, apiSecret)).Should(Succeed())
 
 			By("Creating an AgentConfig whose MCP env uses an unsupported fieldRef")
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-fieldref-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name:    "local-db",
 							Type:    "stdio",
@@ -899,13 +900,13 @@ var _ = Describe("Task Controller", func() {
 
 			By("Creating an AgentConfig with an optional env.valueFrom and a literal env")
 			optional := true
-			agentConfig := &kelosv1alpha1.AgentConfig{
+			agentConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "mcp-optional-missing-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
-					MCPServers: []kelosv1alpha1.MCPServerSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
+					MCPServers: []kelosv1alpha2.MCPServerSpec{
 						{
 							Name:    "local-db",
 							Type:    "stdio",
@@ -3842,24 +3843,24 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
 
 			By("Creating base AgentConfig")
-			baseConfig := &kelosv1alpha1.AgentConfig{
+			baseConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "base-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
 					AgentsMD: "## Environment\nShared environment instructions",
 				},
 			}
 			Expect(k8sClient.Create(ctx, baseConfig)).Should(Succeed())
 
 			By("Creating role AgentConfig")
-			roleConfig := &kelosv1alpha1.AgentConfig{
+			roleConfig := &kelosv1alpha2.AgentConfig{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "role-config",
 					Namespace: ns.Name,
 				},
-				Spec: kelosv1alpha1.AgentConfigSpec{
+				Spec: kelosv1alpha2.AgentConfigSpec{
 					AgentsMD: "## Identity\nWorker agent role",
 				},
 			}

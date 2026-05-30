@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -2393,7 +2394,7 @@ func TestBuildJob_AgentConfigAgentsMD(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Follow TDD. Always write tests first.",
 	}
 
@@ -2444,14 +2445,14 @@ func TestBuildJob_AgentConfigPlugins(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		Plugins: []kelosv1alpha1.PluginSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "team-tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "deploy", Content: "Deploy instructions here"},
 				},
-				Agents: []kelosv1alpha1.AgentDefinition{
+				Agents: []kelosv1alpha2.AgentDefinition{
 					{Name: "reviewer", Content: "You are a code reviewer"},
 				},
 			},
@@ -2549,12 +2550,12 @@ func TestBuildJob_AgentConfigFull(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Follow TDD",
-		Plugins: []kelosv1alpha1.PluginSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "deploy", Content: "Deploy content"},
 				},
 			},
@@ -2608,8 +2609,8 @@ func TestBuildJob_AgentConfigSkills(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		Skills: []kelosv1alpha1.SkillsShSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		Skills: []kelosv1alpha2.SkillsShSpec{
 			{Source: "vercel-labs/agent-skills", Skill: "deploy"},
 			{Source: "anthropics/skills"},
 		},
@@ -2717,16 +2718,16 @@ func TestBuildJob_AgentConfigSkillsWithPlugins(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		Plugins: []kelosv1alpha1.PluginSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "team-tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "review", Content: "Review the PR"},
 				},
 			},
 		},
-		Skills: []kelosv1alpha1.SkillsShSpec{
+		Skills: []kelosv1alpha2.SkillsShSpec{
 			{Source: "vercel-labs/agent-skills", Skill: "deploy"},
 		},
 	}
@@ -2776,8 +2777,8 @@ func TestBuildJob_AgentConfigSkillsEmptySource(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		Skills: []kelosv1alpha1.SkillsShSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		Skills: []kelosv1alpha2.SkillsShSpec{
 			{Source: ""},
 		},
 	}
@@ -2813,12 +2814,12 @@ func TestBuildJob_AgentConfigWithWorkspace(t *testing.T) {
 		Ref:  "main",
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Follow TDD",
-		Plugins: []kelosv1alpha1.PluginSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "deploy", Content: "Deploy content"},
 				},
 			},
@@ -2869,7 +2870,7 @@ func TestBuildJob_AgentConfigWithoutWorkspace(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Follow TDD",
 	}
 
@@ -2919,15 +2920,15 @@ func TestBuildJob_AgentConfigCodex(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Follow TDD. Always write tests first.",
-		Plugins: []kelosv1alpha1.PluginSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "team-tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "deploy", Content: "Deploy instructions here"},
 				},
-				Agents: []kelosv1alpha1.AgentDefinition{
+				Agents: []kelosv1alpha2.AgentDefinition{
 					{Name: "reviewer", Content: "You are a code reviewer"},
 				},
 			},
@@ -2988,12 +2989,12 @@ func TestBuildJob_AgentConfigGemini(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Use conventional commits.",
-		Plugins: []kelosv1alpha1.PluginSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "ci-tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "lint", Content: "Run linter before committing"},
 				},
 			},
@@ -3054,15 +3055,15 @@ func TestBuildJob_AgentConfigOpenCode(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Always run tests before committing.",
-		Plugins: []kelosv1alpha1.PluginSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "dev-tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "test", Content: "Run unit tests first"},
 				},
-				Agents: []kelosv1alpha1.AgentDefinition{
+				Agents: []kelosv1alpha2.AgentDefinition{
 					{Name: "linter", Content: "You are a code linter"},
 				},
 			},
@@ -3125,41 +3126,41 @@ func TestBuildJob_AgentConfigPluginNamePathTraversal(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		config     *kelosv1alpha1.AgentConfigSpec
+		config     *kelosv1alpha2.AgentConfigSpec
 		wantErrStr string
 	}{
 		{
 			name: "plugin name with slash",
-			config: &kelosv1alpha1.AgentConfigSpec{
-				Plugins: []kelosv1alpha1.PluginSpec{
-					{Name: "../../etc", Skills: []kelosv1alpha1.SkillDefinition{{Name: "s", Content: "c"}}},
+			config: &kelosv1alpha2.AgentConfigSpec{
+				Plugins: []kelosv1alpha2.PluginSpec{
+					{Name: "../../etc", Skills: []kelosv1alpha2.SkillDefinition{{Name: "s", Content: "c"}}},
 				},
 			},
 			wantErrStr: "path separators",
 		},
 		{
 			name: "skill name with slash",
-			config: &kelosv1alpha1.AgentConfigSpec{
-				Plugins: []kelosv1alpha1.PluginSpec{
-					{Name: "ok", Skills: []kelosv1alpha1.SkillDefinition{{Name: "../evil", Content: "c"}}},
+			config: &kelosv1alpha2.AgentConfigSpec{
+				Plugins: []kelosv1alpha2.PluginSpec{
+					{Name: "ok", Skills: []kelosv1alpha2.SkillDefinition{{Name: "../evil", Content: "c"}}},
 				},
 			},
 			wantErrStr: "path separators",
 		},
 		{
 			name: "agent name dot-dot",
-			config: &kelosv1alpha1.AgentConfigSpec{
-				Plugins: []kelosv1alpha1.PluginSpec{
-					{Name: "ok", Agents: []kelosv1alpha1.AgentDefinition{{Name: "..", Content: "c"}}},
+			config: &kelosv1alpha2.AgentConfigSpec{
+				Plugins: []kelosv1alpha2.PluginSpec{
+					{Name: "ok", Agents: []kelosv1alpha2.AgentDefinition{{Name: "..", Content: "c"}}},
 				},
 			},
 			wantErrStr: "path traversal",
 		},
 		{
 			name: "plugin name is dot",
-			config: &kelosv1alpha1.AgentConfigSpec{
-				Plugins: []kelosv1alpha1.PluginSpec{
-					{Name: ".", Skills: []kelosv1alpha1.SkillDefinition{{Name: "s", Content: "c"}}},
+			config: &kelosv1alpha2.AgentConfigSpec{
+				Plugins: []kelosv1alpha2.PluginSpec{
+					{Name: ".", Skills: []kelosv1alpha2.SkillDefinition{{Name: "s", Content: "c"}}},
 				},
 			},
 			wantErrStr: "path traversal",
@@ -3473,8 +3474,8 @@ func TestBuildJob_AgentConfigMCPServers(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{
 				Name: "github",
 				Type: "http",
@@ -3582,8 +3583,8 @@ func TestBuildJob_AgentConfigMCPServersWithHTTPHeaders(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{
 				Name:    "secure-api",
 				Type:    "http",
@@ -3645,17 +3646,17 @@ func TestBuildJob_AgentConfigMCPServersWithPluginsAndAgentsMD(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "Follow TDD",
-		Plugins: []kelosv1alpha1.PluginSpec{
+		Plugins: []kelosv1alpha2.PluginSpec{
 			{
 				Name: "tools",
-				Skills: []kelosv1alpha1.SkillDefinition{
+				Skills: []kelosv1alpha2.SkillDefinition{
 					{Name: "deploy", Content: "Deploy content"},
 				},
 			},
 		},
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{
 				Name: "github",
 				Type: "http",
@@ -3714,8 +3715,8 @@ func TestBuildJob_AgentConfigMCPServersCodex(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{
 				Name: "github",
 				Type: "http",
@@ -3758,8 +3759,8 @@ func TestBuildJob_AgentConfigMCPServersGemini(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{
 				Name: "github",
 				Type: "http",
@@ -3802,8 +3803,8 @@ func TestBuildJob_AgentConfigMCPServersEmptyName(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{
 				Name: "",
 				Type: "http",
@@ -3838,8 +3839,8 @@ func TestBuildJob_AgentConfigMCPServersDuplicateName(t *testing.T) {
 		},
 	}
 
-	agentConfig := &kelosv1alpha1.AgentConfigSpec{
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+	agentConfig := &kelosv1alpha2.AgentConfigSpec{
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{Name: "github", Type: "http", URL: "https://api.githubcopilot.com/mcp/"},
 			{Name: "github", Type: "sse", URL: "https://other.example.com/sse"},
 		},
@@ -3882,8 +3883,8 @@ func TestBuildJob_AgentConfigMCPServerNamePathTraversal(t *testing.T) {
 					},
 				},
 			}
-			agentConfig := &kelosv1alpha1.AgentConfigSpec{
-				MCPServers: []kelosv1alpha1.MCPServerSpec{
+			agentConfig := &kelosv1alpha2.AgentConfigSpec{
+				MCPServers: []kelosv1alpha2.MCPServerSpec{
 					{Name: tt.mcpName, Type: "http", URL: "https://example.com/mcp"},
 				},
 			}

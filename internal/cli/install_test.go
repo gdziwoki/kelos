@@ -862,7 +862,7 @@ var kelosListKinds = map[schema.GroupVersionResource]string{
 	{Group: "kelos.dev", Version: "v1alpha1", Resource: "tasks"}:        "TaskList",
 	{Group: "kelos.dev", Version: "v1alpha1", Resource: "taskspawners"}: "TaskSpawnerList",
 	{Group: "kelos.dev", Version: "v1alpha1", Resource: "workspaces"}:   "WorkspaceList",
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "agentconfigs"}: "AgentConfigList",
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "agentconfigs"}: "AgentConfigList",
 }
 
 func TestDeleteAllCustomResources_NoResources(t *testing.T) {

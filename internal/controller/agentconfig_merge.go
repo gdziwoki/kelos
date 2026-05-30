@@ -4,13 +4,14 @@ import (
 	"strings"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 )
 
 // MergeAgentConfigs merges multiple AgentConfigSpecs in order.
 // agentsMD values are concatenated with "\n\n", plugins and skills are
 // appended, and mcpServers are appended with later entries winning on
 // name collision. Returns nil if the input slice is empty.
-func MergeAgentConfigs(configs []kelosv1alpha1.AgentConfigSpec) *kelosv1alpha1.AgentConfigSpec {
+func MergeAgentConfigs(configs []kelosv1alpha2.AgentConfigSpec) *kelosv1alpha2.AgentConfigSpec {
 	if len(configs) == 0 {
 		return nil
 	}
@@ -19,7 +20,7 @@ func MergeAgentConfigs(configs []kelosv1alpha1.AgentConfigSpec) *kelosv1alpha1.A
 		return &result
 	}
 
-	merged := kelosv1alpha1.AgentConfigSpec{}
+	merged := kelosv1alpha2.AgentConfigSpec{}
 
 	var mdParts []string
 	for _, c := range configs {

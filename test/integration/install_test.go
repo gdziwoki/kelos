@@ -64,6 +64,40 @@ func deleteControllerResources() {
 	}, 30*time.Second, 100*time.Millisecond).Should(BeTrue())
 }
 
+// normalizeAgentConfigConversion rewrites the live agentconfigs CRD conversion
+// to the service-based form that `kelos install` applies, clearing any url that
+// envtest's WebhookInstallOptions injected. Without this, install's server-side
+// apply (which sets clientConfig.service) leaves the envtest-injected
+// clientConfig.url in place, and the API server rejects the CRD because exactly
+// one of url or service is allowed. This is an envtest-only concern: a real
+// cluster never has the local url. No-op if the CRD does not exist yet.
+func normalizeAgentConfigConversion() {
+	crdGVK := schema.GroupVersionKind{Group: "apiextensions.k8s.io", Version: "v1", Kind: "CustomResourceDefinition"}
+	crd := &unstructured.Unstructured{}
+	crd.SetGroupVersionKind(crdGVK)
+	if err := k8sClient.Get(ctx, types.NamespacedName{Name: "agentconfigs.kelos.dev"}, crd); err != nil {
+		return
+	}
+	conversion := map[string]interface{}{
+		"strategy": "Webhook",
+		"webhook": map[string]interface{}{
+			"conversionReviewVersions": []interface{}{"v1"},
+			"clientConfig": map[string]interface{}{
+				"service": map[string]interface{}{
+					"name":      "kelos-webhook",
+					"namespace": "kelos-system",
+					"path":      "/convert",
+					"port":      int64(443),
+				},
+			},
+		},
+	}
+	if err := unstructured.SetNestedMap(crd.Object, conversion, "spec", "conversion"); err != nil {
+		return
+	}
+	_ = k8sClient.Update(ctx, crd)
+}
+
 // restoreCRDs re-applies CRDs by running install followed by cleanup of
 // non-CRD resources. This restores the envtest environment after uninstall
 // removes CRDs that were originally loaded by the BeforeSuite.
@@ -112,6 +146,9 @@ var _ = Describe("Install/Uninstall", Ordered, func() {
 
 	BeforeEach(func() {
 		kubeconfigPath = writeEnvtestKubeconfig()
+		// Reconcile the agentconfigs CRD conversion with what install applies so
+		// server-side apply does not collide with envtest's injected url.
+		normalizeAgentConfigConversion()
 	})
 
 	Context("kelos install", func() {

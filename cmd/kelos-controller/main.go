@@ -19,6 +19,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 	"github.com/kelos-dev/kelos/internal/controller"
 	"github.com/kelos-dev/kelos/internal/githubapp"
 	"github.com/kelos-dev/kelos/internal/logging"
@@ -33,6 +34,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kelosv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kelosv1alpha2.AddToScheme(scheme))
 }
 
 func main() {
@@ -233,6 +235,14 @@ func main() {
 		Recorder:          mgr.GetEventRecorderFor("kelos-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "TaskSpawner")
+		os.Exit(1)
+	}
+
+	// Serve the AgentConfig conversion webhook (v1alpha1 <-> v1alpha2). The
+	// builder registers the /convert handler because v1alpha2.AgentConfig is the
+	// conversion hub and v1alpha1.AgentConfig is convertible.
+	if err := ctrl.NewWebhookManagedBy(mgr, &kelosv1alpha2.AgentConfig{}).Complete(); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "AgentConfig")
 		os.Exit(1)
 	}
 

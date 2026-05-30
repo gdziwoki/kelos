@@ -448,7 +448,9 @@ var kelosGVRs = []schema.GroupVersionResource{
 	{Group: "kelos.dev", Version: "v1alpha1", Resource: "tasks"},
 	{Group: "kelos.dev", Version: "v1alpha1", Resource: "taskspawners"},
 	{Group: "kelos.dev", Version: "v1alpha1", Resource: "workspaces"},
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "agentconfigs"},
+	// agentconfigs is served in two versions; list/delete via the storage
+	// version (v1alpha2) so cleanup does not depend on the conversion webhook.
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "agentconfigs"},
 }
 
 // crDeletionTimeout is the maximum time to wait for all custom resources

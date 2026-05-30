@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 )
 
 const (
@@ -116,7 +117,7 @@ func NewJobBuilder() *JobBuilder {
 
 // Build creates a Job for the given Task. The prompt parameter is the
 // resolved prompt text (which may have been expanded from a template).
-func (b *JobBuilder) Build(task *kelosv1alpha1.Task, workspace *kelosv1alpha1.WorkspaceSpec, agentConfig *kelosv1alpha1.AgentConfigSpec, prompt string) (*batchv1.Job, error) {
+func (b *JobBuilder) Build(task *kelosv1alpha1.Task, workspace *kelosv1alpha1.WorkspaceSpec, agentConfig *kelosv1alpha2.AgentConfigSpec, prompt string) (*batchv1.Job, error) {
 	switch task.Spec.Type {
 	case AgentTypeClaudeCode:
 		return b.buildAgentJob(task, workspace, agentConfig, b.ClaudeCodeImage, b.ClaudeCodeImagePullPolicy, prompt)
@@ -245,7 +246,7 @@ func upstreamRepoEnvValue(remotes []kelosv1alpha1.GitRemote) string {
 }
 
 // buildAgentJob creates a Job for the given agent type.
-func (b *JobBuilder) buildAgentJob(task *kelosv1alpha1.Task, workspace *kelosv1alpha1.WorkspaceSpec, agentConfig *kelosv1alpha1.AgentConfigSpec, defaultImage string, pullPolicy corev1.PullPolicy, prompt string) (*batchv1.Job, error) {
+func (b *JobBuilder) buildAgentJob(task *kelosv1alpha1.Task, workspace *kelosv1alpha1.WorkspaceSpec, agentConfig *kelosv1alpha2.AgentConfigSpec, defaultImage string, pullPolicy corev1.PullPolicy, prompt string) (*batchv1.Job, error) {
 	image := defaultImage
 	if task.Spec.Image != "" {
 		image = task.Spec.Image
@@ -919,7 +920,7 @@ func sanitizeComponentName(name, kind string) error {
 	return nil
 }
 
-func buildPluginSetupScript(plugins []kelosv1alpha1.PluginSpec) (string, error) {
+func buildPluginSetupScript(plugins []kelosv1alpha2.PluginSpec) (string, error) {
 	lines := []string{"set -eu"}
 
 	for _, plugin := range plugins {
@@ -961,7 +962,7 @@ func buildPluginSetupScript(plugins []kelosv1alpha1.PluginSpec) (string, error) 
 // packages into the plugin volume using "npx skills add".
 // The script installs git (required by the skills CLI to clone repositories),
 // runs npx as the agent user, and ensures all output files are owned by AgentUID.
-func buildSkillsInstallScript(skills []kelosv1alpha1.SkillsShSpec, agentType string) (string, error) {
+func buildSkillsInstallScript(skills []kelosv1alpha2.SkillsShSpec, agentType string) (string, error) {
 	lines := []string{
 		"set -eu",
 		"apk add --no-cache git >/dev/null 2>&1",
@@ -999,7 +1000,7 @@ type mcpServerJSON struct {
 // that matches the .mcp.json format: {"mcpServers":{"name":{...},...}}.
 // Env entries must already be resolved to literal Name/Value pairs by
 // resolveMCPServerSecrets — any remaining ValueFrom is treated as a bug.
-func buildMCPServersJSON(servers []kelosv1alpha1.MCPServerSpec) (string, error) {
+func buildMCPServersJSON(servers []kelosv1alpha2.MCPServerSpec) (string, error) {
 	mcpMap := make(map[string]mcpServerJSON, len(servers))
 	for _, s := range servers {
 		if s.Name == "" {

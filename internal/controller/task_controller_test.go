@@ -23,6 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 	"github.com/kelos-dev/kelos/internal/githubapp"
 )
 
@@ -221,6 +222,7 @@ func TestResolveGitHubAppToken_EnterpriseURL(t *testing.T) {
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 			utilruntime.Must(kelosv1alpha1.AddToScheme(scheme))
+			utilruntime.Must(kelosv1alpha2.AddToScheme(scheme))
 
 			secretData := map[string][]byte{
 				"appID":          []byte("12345"),
@@ -295,6 +297,7 @@ func TestResolveGitHubAppToken_PATSecret(t *testing.T) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kelosv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kelosv1alpha2.AddToScheme(scheme))
 
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -344,6 +347,7 @@ func newReconcilerWithFakeClient(objs ...runtime.Object) *TaskReconciler {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kelosv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kelosv1alpha2.AddToScheme(scheme))
 
 	cl := fake.NewClientBuilder().
 		WithScheme(scheme).
@@ -369,7 +373,7 @@ func TestResolveMCPServerSecrets_HeadersFrom(t *testing.T) {
 	}
 
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "github",
 			Type: "http",
@@ -377,8 +381,8 @@ func TestResolveMCPServerSecrets_HeadersFrom(t *testing.T) {
 			Headers: map[string]string{
 				"X-Inline": "inline-value",
 			},
-			HeadersFrom: &kelosv1alpha1.SecretValuesSource{
-				SecretRef: kelosv1alpha1.SecretReference{Name: "mcp-headers"},
+			HeadersFrom: &kelosv1alpha2.SecretValuesSource{
+				SecretRef: kelosv1alpha2.SecretReference{Name: "mcp-headers"},
 			},
 		},
 	}
@@ -415,7 +419,7 @@ func TestResolveMCPServerSecrets_EnvFrom(t *testing.T) {
 	}
 
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name:    "local-db",
 			Type:    "stdio",
@@ -424,8 +428,8 @@ func TestResolveMCPServerSecrets_EnvFrom(t *testing.T) {
 			Env: []corev1.EnvVar{
 				{Name: "DSN", Value: "postgres://localhost/db"},
 			},
-			EnvFrom: &kelosv1alpha1.SecretValuesSource{
-				SecretRef: kelosv1alpha1.SecretReference{Name: "mcp-env"},
+			EnvFrom: &kelosv1alpha2.SecretValuesSource{
+				SecretRef: kelosv1alpha2.SecretReference{Name: "mcp-env"},
 			},
 		},
 	}
@@ -459,7 +463,7 @@ func TestResolveMCPServerSecrets_EnvValueFromSecretKey(t *testing.T) {
 	}
 
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name:    "local-db",
 			Type:    "stdio",
@@ -504,7 +508,7 @@ func TestResolveMCPServerSecrets_EnvValueFromConfigMapKey(t *testing.T) {
 	}
 
 	r := newReconcilerWithFakeClient(cm)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name:    "local-db",
 			Type:    "stdio",
@@ -537,7 +541,7 @@ func TestResolveMCPServerSecrets_EnvValueFromMissingKey(t *testing.T) {
 		Data:       map[string][]byte{"other": []byte("x")},
 	}
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -564,7 +568,7 @@ func TestResolveMCPServerSecrets_EnvValueFromOptionalMissingKey(t *testing.T) {
 	}
 	optional := true
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -597,7 +601,7 @@ func TestResolveMCPServerSecrets_EnvValueFromOptionalMissingConfigMapKey(t *test
 	}
 	optional := true
 	r := newReconcilerWithFakeClient(cm)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -625,7 +629,7 @@ func TestResolveMCPServerSecrets_EnvValueFromOptionalMissingConfigMapKey(t *test
 
 func TestResolveMCPServerSecrets_EnvValueFromUnsupportedFieldRef(t *testing.T) {
 	r := newReconcilerWithFakeClient()
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -654,7 +658,7 @@ func TestResolveMCPServerSecrets_EnvValueFromSecretKeyWithFieldRef(t *testing.T)
 		Data:       map[string][]byte{"password": []byte("hunter2")},
 	}
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -681,7 +685,7 @@ func TestResolveMCPServerSecrets_EnvValueFromSecretKeyWithFieldRef(t *testing.T)
 
 func TestResolveMCPServerSecrets_EnvValueFromUnsupportedFileKeyRef(t *testing.T) {
 	r := newReconcilerWithFakeClient()
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -708,7 +712,7 @@ func TestResolveMCPServerSecrets_EnvValueAndValueFromMutuallyExclusive(t *testin
 		Data:       map[string][]byte{"password": []byte("hunter2")},
 	}
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -743,7 +747,7 @@ func TestResolveMCPServerSecrets_EnvFromOverridesValueFrom(t *testing.T) {
 	}
 
 	r := newReconcilerWithFakeClient(keySecret, bulkSecret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "local",
 			Type: "stdio",
@@ -755,8 +759,8 @@ func TestResolveMCPServerSecrets_EnvFromOverridesValueFrom(t *testing.T) {
 					},
 				}},
 			},
-			EnvFrom: &kelosv1alpha1.SecretValuesSource{
-				SecretRef: kelosv1alpha1.SecretReference{Name: "bulk-secret"},
+			EnvFrom: &kelosv1alpha2.SecretValuesSource{
+				SecretRef: kelosv1alpha2.SecretReference{Name: "bulk-secret"},
 			},
 		},
 	}
@@ -791,7 +795,7 @@ func TestResolveMCPServerSecrets_SecretTakesPrecedence(t *testing.T) {
 	}
 
 	r := newReconcilerWithFakeClient(secret)
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "github",
 			Type: "http",
@@ -799,8 +803,8 @@ func TestResolveMCPServerSecrets_SecretTakesPrecedence(t *testing.T) {
 			Headers: map[string]string{
 				"Authorization": "Bearer inline-token",
 			},
-			HeadersFrom: &kelosv1alpha1.SecretValuesSource{
-				SecretRef: kelosv1alpha1.SecretReference{Name: "mcp-headers"},
+			HeadersFrom: &kelosv1alpha2.SecretValuesSource{
+				SecretRef: kelosv1alpha2.SecretReference{Name: "mcp-headers"},
 			},
 		},
 	}
@@ -817,13 +821,13 @@ func TestResolveMCPServerSecrets_SecretTakesPrecedence(t *testing.T) {
 
 func TestResolveMCPServerSecrets_MissingSecret(t *testing.T) {
 	r := newReconcilerWithFakeClient()
-	servers := []kelosv1alpha1.MCPServerSpec{
+	servers := []kelosv1alpha2.MCPServerSpec{
 		{
 			Name: "github",
 			Type: "http",
 			URL:  "https://api.example.com/mcp/",
-			HeadersFrom: &kelosv1alpha1.SecretValuesSource{
-				SecretRef: kelosv1alpha1.SecretReference{Name: "missing-secret"},
+			HeadersFrom: &kelosv1alpha2.SecretValuesSource{
+				SecretRef: kelosv1alpha2.SecretReference{Name: "missing-secret"},
 			},
 		},
 	}
@@ -925,6 +929,7 @@ func TestUpdateStatusRefreshesPodName(t *testing.T) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kelosv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kelosv1alpha2.AddToScheme(scheme))
 
 	now := time.Now()
 	task := &kelosv1alpha1.Task{
@@ -982,6 +987,7 @@ func TestUpdateStatusClearsStalePodNameWhenNoLivePodsRemain(t *testing.T) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kelosv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kelosv1alpha2.AddToScheme(scheme))
 
 	task := &kelosv1alpha1.Task{
 		ObjectMeta: metav1.ObjectMeta{

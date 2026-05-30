@@ -8,6 +8,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 )
 
 func completeTaskNames(cfg *ClientConfig) cobra.CompletionFunc {
@@ -78,7 +79,7 @@ func completeAgentConfigNames(cfg *ClientConfig) cobra.CompletionFunc {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
-		acList := &kelosv1alpha1.AgentConfigList{}
+		acList := &kelosv1alpha2.AgentConfigList{}
 		if err := cl.List(ctx, acList, client.InNamespace(ns)); err != nil {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}

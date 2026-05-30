@@ -4,27 +4,28 @@ import (
 	"testing"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 )
 
 func TestMergeAgentConfigs_Empty(t *testing.T) {
 	if got := MergeAgentConfigs(nil); got != nil {
 		t.Errorf("Expected nil, got %+v", got)
 	}
-	if got := MergeAgentConfigs([]kelosv1alpha1.AgentConfigSpec{}); got != nil {
+	if got := MergeAgentConfigs([]kelosv1alpha2.AgentConfigSpec{}); got != nil {
 		t.Errorf("Expected nil, got %+v", got)
 	}
 }
 
 func TestMergeAgentConfigs_Single(t *testing.T) {
-	input := kelosv1alpha1.AgentConfigSpec{
+	input := kelosv1alpha2.AgentConfigSpec{
 		AgentsMD: "# Instructions",
-		Plugins:  []kelosv1alpha1.PluginSpec{{Name: "p1"}},
-		Skills:   []kelosv1alpha1.SkillsShSpec{{Source: "owner/repo"}},
-		MCPServers: []kelosv1alpha1.MCPServerSpec{
+		Plugins:  []kelosv1alpha2.PluginSpec{{Name: "p1"}},
+		Skills:   []kelosv1alpha2.SkillsShSpec{{Source: "owner/repo"}},
+		MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{Name: "server1", Type: "stdio", Command: "cmd"},
 		},
 	}
-	got := MergeAgentConfigs([]kelosv1alpha1.AgentConfigSpec{input})
+	got := MergeAgentConfigs([]kelosv1alpha2.AgentConfigSpec{input})
 	if got == nil {
 		t.Fatal("Expected non-nil result")
 	}
@@ -43,7 +44,7 @@ func TestMergeAgentConfigs_Single(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_AgentsMDConcatenation(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
+	configs := []kelosv1alpha2.AgentConfigSpec{
 		{AgentsMD: "# Config A"},
 		{AgentsMD: "# Config B"},
 	}
@@ -55,7 +56,7 @@ func TestMergeAgentConfigs_AgentsMDConcatenation(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_AgentsMDSkipsEmpty(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
+	configs := []kelosv1alpha2.AgentConfigSpec{
 		{AgentsMD: ""},
 		{AgentsMD: "# Config B"},
 	}
@@ -66,9 +67,9 @@ func TestMergeAgentConfigs_AgentsMDSkipsEmpty(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_PluginsAppended(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
-		{Plugins: []kelosv1alpha1.PluginSpec{{Name: "p1"}}},
-		{Plugins: []kelosv1alpha1.PluginSpec{{Name: "p2"}, {Name: "p3"}}},
+	configs := []kelosv1alpha2.AgentConfigSpec{
+		{Plugins: []kelosv1alpha2.PluginSpec{{Name: "p1"}}},
+		{Plugins: []kelosv1alpha2.PluginSpec{{Name: "p2"}, {Name: "p3"}}},
 	}
 	got := MergeAgentConfigs(configs)
 	if len(got.Plugins) != 3 {
@@ -84,9 +85,9 @@ func TestMergeAgentConfigs_PluginsAppended(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_SkillsAppended(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
-		{Skills: []kelosv1alpha1.SkillsShSpec{{Source: "a/b"}}},
-		{Skills: []kelosv1alpha1.SkillsShSpec{{Source: "c/d"}}},
+	configs := []kelosv1alpha2.AgentConfigSpec{
+		{Skills: []kelosv1alpha2.SkillsShSpec{{Source: "a/b"}}},
+		{Skills: []kelosv1alpha2.SkillsShSpec{{Source: "c/d"}}},
 	}
 	got := MergeAgentConfigs(configs)
 	if len(got.Skills) != 2 {
@@ -98,9 +99,9 @@ func TestMergeAgentConfigs_SkillsAppended(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_MCPServersAppended(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
-		{MCPServers: []kelosv1alpha1.MCPServerSpec{{Name: "s1", Type: "stdio"}}},
-		{MCPServers: []kelosv1alpha1.MCPServerSpec{{Name: "s2", Type: "http"}}},
+	configs := []kelosv1alpha2.AgentConfigSpec{
+		{MCPServers: []kelosv1alpha2.MCPServerSpec{{Name: "s1", Type: "stdio"}}},
+		{MCPServers: []kelosv1alpha2.MCPServerSpec{{Name: "s2", Type: "http"}}},
 	}
 	got := MergeAgentConfigs(configs)
 	if len(got.MCPServers) != 2 {
@@ -112,9 +113,9 @@ func TestMergeAgentConfigs_MCPServersAppended(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_MCPServersLaterWins(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
-		{MCPServers: []kelosv1alpha1.MCPServerSpec{{Name: "shared", Type: "stdio", Command: "old"}}},
-		{MCPServers: []kelosv1alpha1.MCPServerSpec{{Name: "shared", Type: "http", URL: "http://new"}}},
+	configs := []kelosv1alpha2.AgentConfigSpec{
+		{MCPServers: []kelosv1alpha2.MCPServerSpec{{Name: "shared", Type: "stdio", Command: "old"}}},
+		{MCPServers: []kelosv1alpha2.MCPServerSpec{{Name: "shared", Type: "http", URL: "http://new"}}},
 	}
 	got := MergeAgentConfigs(configs)
 	if len(got.MCPServers) != 1 {
@@ -126,12 +127,12 @@ func TestMergeAgentConfigs_MCPServersLaterWins(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_MCPServersOrderPreserved(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
-		{MCPServers: []kelosv1alpha1.MCPServerSpec{
+	configs := []kelosv1alpha2.AgentConfigSpec{
+		{MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{Name: "a", Type: "stdio", Command: "a1"},
 			{Name: "b", Type: "stdio", Command: "b1"},
 		}},
-		{MCPServers: []kelosv1alpha1.MCPServerSpec{
+		{MCPServers: []kelosv1alpha2.MCPServerSpec{
 			{Name: "c", Type: "http", URL: "http://c"},
 			{Name: "a", Type: "http", URL: "http://a2"},
 		}},
@@ -153,22 +154,22 @@ func TestMergeAgentConfigs_MCPServersOrderPreserved(t *testing.T) {
 }
 
 func TestMergeAgentConfigs_ThreeConfigs(t *testing.T) {
-	configs := []kelosv1alpha1.AgentConfigSpec{
+	configs := []kelosv1alpha2.AgentConfigSpec{
 		{
 			AgentsMD: "## Environment",
-			Plugins:  []kelosv1alpha1.PluginSpec{{Name: "base"}},
-			MCPServers: []kelosv1alpha1.MCPServerSpec{
+			Plugins:  []kelosv1alpha2.PluginSpec{{Name: "base"}},
+			MCPServers: []kelosv1alpha2.MCPServerSpec{
 				{Name: "shared", Type: "stdio", Command: "v1"},
 			},
 		},
 		{
 			AgentsMD: "## Standards",
-			Skills:   []kelosv1alpha1.SkillsShSpec{{Source: "org/skills"}},
+			Skills:   []kelosv1alpha2.SkillsShSpec{{Source: "org/skills"}},
 		},
 		{
 			AgentsMD: "## Identity",
-			Plugins:  []kelosv1alpha1.PluginSpec{{Name: "role"}},
-			MCPServers: []kelosv1alpha1.MCPServerSpec{
+			Plugins:  []kelosv1alpha2.PluginSpec{{Name: "role"}},
+			MCPServers: []kelosv1alpha2.MCPServerSpec{
 				{Name: "shared", Type: "http", URL: "http://v2"},
 				{Name: "extra", Type: "sse", URL: "http://extra"},
 			},
