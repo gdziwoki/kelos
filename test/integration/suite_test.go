@@ -18,6 +18,7 @@ import (
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/conversion"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -110,9 +111,15 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	// Register the AgentConfig conversion webhook (v1alpha1 <-> v1alpha2).
-	err = ctrl.NewWebhookManagedBy(mgr, &kelosv1alpha2.AgentConfig{}).Complete()
-	Expect(err).NotTo(HaveOccurred())
+	// Register the conversion webhooks (v1alpha1 <-> v1alpha2) for every kelos hub.
+	for _, hub := range []conversion.Hub{
+		&kelosv1alpha2.AgentConfig{},
+		&kelosv1alpha2.Task{},
+		&kelosv1alpha2.Workspace{},
+		&kelosv1alpha2.TaskSpawner{},
+	} {
+		Expect(ctrl.NewWebhookManagedBy(mgr, hub).Complete()).To(Succeed())
+	}
 
 	tokenClient := githubapp.NewTokenClient()
 	tokenClient.BaseURL = mockGitHubServer.URL

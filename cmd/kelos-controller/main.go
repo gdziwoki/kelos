@@ -14,6 +14,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/conversion"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -238,12 +239,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Serve the AgentConfig conversion webhook (v1alpha1 <-> v1alpha2). The
-	// builder registers the /convert handler because v1alpha2.AgentConfig is the
-	// conversion hub and v1alpha1.AgentConfig is convertible.
-	if err := ctrl.NewWebhookManagedBy(mgr, &kelosv1alpha2.AgentConfig{}).Complete(); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "AgentConfig")
-		os.Exit(1)
+	// Serve the conversion webhooks (v1alpha1 <-> v1alpha2). The builder
+	// registers the single /convert handler for each hub type; the handler
+	// dispatches by GVK to the matching ConvertTo/ConvertFrom.
+	for _, hub := range []conversion.Hub{
+		&kelosv1alpha2.AgentConfig{},
+		&kelosv1alpha2.Task{},
+		&kelosv1alpha2.Workspace{},
+		&kelosv1alpha2.TaskSpawner{},
+	} {
+		if err := ctrl.NewWebhookManagedBy(mgr, hub).Complete(); err != nil {
+			setupLog.Error(err, "unable to create conversion webhook", "hub", fmt.Sprintf("%T", hub))
+			os.Exit(1)
+		}
 	}
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

@@ -211,13 +211,13 @@ write_chart_crd_template() {
   } >"${dest}"
 }
 
-# inject_agentconfig_conversion adds the conversion webhook config and the
-# cert-manager CA-injection annotation to the AgentConfig CRD in place. The
-# AgentConfig CRD serves two versions (v1alpha1 map env, v1alpha2 list env) with
-# different schemas, so it needs a webhook conversion strategy. controller-gen
-# does not emit spec.conversion, so it is injected here, before the chart
-# templates are derived from this file.
-inject_agentconfig_conversion() {
+# inject_kelos_conversion adds the conversion webhook config and the
+# cert-manager CA-injection annotation to every kelos.dev CRD in place. Each
+# kelos CRD serves two versions (v1alpha1 and v1alpha2) with different schemas,
+# so it needs a webhook conversion strategy. controller-gen does not emit
+# spec.conversion, so it is injected here, before the chart templates are
+# derived from this file.
+inject_kelos_conversion() {
   local file="$1"
   local tmp="${file}.conv.tmp"
 
@@ -225,7 +225,7 @@ inject_agentconfig_conversion() {
 function flush(  i, isAC) {
   isAC = 0
   for (i = 1; i <= n; i++) {
-    if (buf[i] ~ /^  name: agentconfigs\.kelos\.dev[[:space:]]*$/) { isAC = 1; break }
+    if (buf[i] ~ /^  name: [a-z]+\.kelos\.dev[[:space:]]*$/) { isAC = 1; break }
   }
   for (i = 1; i <= n; i++) {
     print buf[i]
@@ -281,7 +281,7 @@ trap 'rm -rf "${TMPDIR}"' EXIT
 
 # Regenerate CRDs before syncing manifests.
 "${CONTROLLER_GEN}" crd paths="./..." output:crd:stdout >internal/manifests/install-crd.yaml
-inject_agentconfig_conversion internal/manifests/install-crd.yaml
+inject_kelos_conversion internal/manifests/install-crd.yaml
 generate_chart_crd_templates "internal/manifests/install-crd.yaml"
 
 RBAC_FILE="${TMPDIR}/rbac.yaml"

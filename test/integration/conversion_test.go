@@ -17,15 +17,20 @@ import (
 	kelosv1alpha2 "github.com/kelos-dev/kelos/api/v1alpha2"
 )
 
-// pointConversionToEnvtest rewrites the agentconfigs CRD conversion to the local
+// kelosCRDNames are the kelos CRDs that serve two versions with a conversion
+// webhook.
+var kelosCRDNames = []string{
+	"agentconfigs.kelos.dev",
+	"tasks.kelos.dev",
+	"taskspawners.kelos.dev",
+	"workspaces.kelos.dev",
+}
+
+// pointConversionToEnvtest rewrites every kelos CRD conversion to the local
 // webhook envtest serves, so conversion works regardless of any service-based
 // config left by the install tests.
 func pointConversionToEnvtest() {
 	crdGVK := schema.GroupVersionKind{Group: "apiextensions.k8s.io", Version: "v1", Kind: "CustomResourceDefinition"}
-	crd := &unstructured.Unstructured{}
-	crd.SetGroupVersionKind(crdGVK)
-	Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "agentconfigs.kelos.dev"}, crd)).To(Succeed())
-
 	url := fmt.Sprintf("https://%s/convert", net.JoinHostPort(webhookHost, fmt.Sprintf("%d", webhookPort)))
 	conversion := map[string]interface{}{
 		"strategy": "Webhook",
@@ -37,8 +42,15 @@ func pointConversionToEnvtest() {
 			},
 		},
 	}
-	Expect(unstructured.SetNestedMap(crd.Object, conversion, "spec", "conversion")).To(Succeed())
-	Expect(k8sClient.Update(ctx, crd)).To(Succeed())
+	for _, name := range kelosCRDNames {
+		crd := &unstructured.Unstructured{}
+		crd.SetGroupVersionKind(crdGVK)
+		if err := k8sClient.Get(ctx, types.NamespacedName{Name: name}, crd); err != nil {
+			continue
+		}
+		Expect(unstructured.SetNestedMap(crd.Object, conversion, "spec", "conversion")).To(Succeed())
+		_ = k8sClient.Update(ctx, crd)
+	}
 }
 
 var _ = Describe("AgentConfig conversion webhook", Ordered, func() {
@@ -117,5 +129,39 @@ var _ = Describe("AgentConfig conversion webhook", Ordered, func() {
 		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "cfg", Namespace: ns.Name}, got)).To(Succeed())
 		Expect(got.Spec.MCPServers).To(HaveLen(1))
 		Expect(got.Spec.MCPServers[0].Env).To(Equal(map[string]string{"LITERAL": "x"}))
+	})
+
+	It("folds TaskSpawner legacy comment + root pollInterval into v1alpha2", func() {
+		ns := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "test-conv-ts"}}
+		Expect(k8sClient.Create(ctx, ns)).To(Succeed())
+
+		By("Creating a v1alpha1 TaskSpawner using legacy triggerComment + root pollInterval")
+		v1 := &kelosv1alpha1.TaskSpawner{
+			ObjectMeta: metav1.ObjectMeta{Name: "ts", Namespace: ns.Name},
+			Spec: kelosv1alpha1.TaskSpawnerSpec{
+				PollInterval: "9m",
+				When: kelosv1alpha1.When{
+					GitHubIssues: &kelosv1alpha1.GitHubIssues{
+						Repo:           "owner/repo",
+						TriggerComment: "/kelos go",
+					},
+				},
+				TaskTemplate: kelosv1alpha1.TaskTemplate{
+					Type:         "claude-code",
+					Credentials:  kelosv1alpha1.Credentials{Type: kelosv1alpha1.CredentialTypeNone},
+					WorkspaceRef: &kelosv1alpha1.WorkspaceReference{Name: "ws"},
+				},
+			},
+		}
+		Expect(k8sClient.Create(ctx, v1)).To(Succeed())
+
+		By("Reading it back as v1alpha2 and asserting the foldings")
+		got := &kelosv1alpha2.TaskSpawner{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "ts", Namespace: ns.Name}, got)).To(Succeed())
+		gi := got.Spec.When.GitHubIssues
+		Expect(gi).NotTo(BeNil())
+		Expect(gi.PollInterval).To(Equal("9m"))
+		Expect(gi.CommentPolicy).NotTo(BeNil())
+		Expect(gi.CommentPolicy.TriggerComment).To(Equal("/kelos go"))
 	})
 })

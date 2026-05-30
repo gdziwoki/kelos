@@ -444,12 +444,12 @@ func nonEmptyStringPtr(s string) *string {
 // before the controller and CRDs can be safely removed. Resources with
 // finalizers (tasks, taskspawners) must be deleted while the controller is
 // still running so it can process the finalizer removal.
+// All kelos CRDs serve two versions; list/delete via the storage version
+// (v1alpha2) so cleanup does not depend on the conversion webhook being up.
 var kelosGVRs = []schema.GroupVersionResource{
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "tasks"},
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "taskspawners"},
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "workspaces"},
-	// agentconfigs is served in two versions; list/delete via the storage
-	// version (v1alpha2) so cleanup does not depend on the conversion webhook.
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "tasks"},
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "taskspawners"},
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "workspaces"},
 	{Group: "kelos.dev", Version: "v1alpha2", Resource: "agentconfigs"},
 }
 

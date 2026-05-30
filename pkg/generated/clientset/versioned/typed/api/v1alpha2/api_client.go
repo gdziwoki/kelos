@@ -29,6 +29,9 @@ import (
 type ApiV1alpha2Interface interface {
 	RESTClient() rest.Interface
 	AgentConfigsGetter
+	TasksGetter
+	TaskSpawnersGetter
+	WorkspacesGetter
 }
 
 // ApiV1alpha2Client is used to interact with features provided by the api group.
@@ -38,6 +41,18 @@ type ApiV1alpha2Client struct {
 
 func (c *ApiV1alpha2Client) AgentConfigs(namespace string) AgentConfigInterface {
 	return newAgentConfigs(c, namespace)
+}
+
+func (c *ApiV1alpha2Client) Tasks(namespace string) TaskInterface {
+	return newTasks(c, namespace)
+}
+
+func (c *ApiV1alpha2Client) TaskSpawners(namespace string) TaskSpawnerInterface {
+	return newTaskSpawners(c, namespace)
+}
+
+func (c *ApiV1alpha2Client) Workspaces(namespace string) WorkspaceInterface {
+	return newWorkspaces(c, namespace)
 }
 
 // NewForConfig creates a new ApiV1alpha2Client for the given config.

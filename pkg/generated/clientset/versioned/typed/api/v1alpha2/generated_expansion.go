@@ -19,3 +19,9 @@ limitations under the License.
 package v1alpha2
 
 type AgentConfigExpansion interface{}
+
+type TaskExpansion interface{}
+
+type TaskSpawnerExpansion interface{}
+
+type WorkspaceExpansion interface{}

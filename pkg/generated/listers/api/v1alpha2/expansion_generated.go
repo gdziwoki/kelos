@@ -25,3 +25,27 @@ type AgentConfigListerExpansion interface{}
 // AgentConfigNamespaceListerExpansion allows custom methods to be added to
 // AgentConfigNamespaceLister.
 type AgentConfigNamespaceListerExpansion interface{}
+
+// TaskListerExpansion allows custom methods to be added to
+// TaskLister.
+type TaskListerExpansion interface{}
+
+// TaskNamespaceListerExpansion allows custom methods to be added to
+// TaskNamespaceLister.
+type TaskNamespaceListerExpansion interface{}
+
+// TaskSpawnerListerExpansion allows custom methods to be added to
+// TaskSpawnerLister.
+type TaskSpawnerListerExpansion interface{}
+
+// TaskSpawnerNamespaceListerExpansion allows custom methods to be added to
+// TaskSpawnerNamespaceLister.
+type TaskSpawnerNamespaceListerExpansion interface{}
+
+// WorkspaceListerExpansion allows custom methods to be added to
+// WorkspaceLister.
+type WorkspaceListerExpansion interface{}
+
+// WorkspaceNamespaceListerExpansion allows custom methods to be added to
+// WorkspaceNamespaceLister.
+type WorkspaceNamespaceListerExpansion interface{}

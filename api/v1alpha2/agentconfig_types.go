@@ -147,9 +147,9 @@ type SecretValuesSource struct {
 	SecretRef SecretReference `json:"secretRef"`
 }
 
-// SecretReference references a Secret by name in the same namespace.
-type SecretReference struct {
-	// Name is the name of the secret.
+// AgentConfigReference refers to an AgentConfig resource by name.
+type AgentConfigReference struct {
+	// Name is the name of the AgentConfig resource.
 	Name string `json:"name"`
 }
 

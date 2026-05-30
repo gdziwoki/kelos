@@ -1946,8 +1946,10 @@ var _ = Describe("TaskSpawner Controller", func() {
 				err := k8sClient.Get(ctx, tsLookupKey, createdTS)
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
-			Expect(createdTS.Spec.When.GitHubIssues.TriggerComment).To(Equal("/kelos pick-up"))
-			Expect(createdTS.Spec.When.GitHubIssues.ExcludeComments).To(ConsistOf("/kelos needs-input", "/kelos pause"))
+			// The legacy triggerComment/excludeComments are migrated into
+			// commentPolicy by the v1alpha1->v1alpha2 conversion.
+			Expect(createdTS.Spec.When.GitHubIssues.CommentPolicy.TriggerComment).To(Equal("/kelos pick-up"))
+			Expect(createdTS.Spec.When.GitHubIssues.CommentPolicy.ExcludeComments).To(ConsistOf("/kelos needs-input", "/kelos pause"))
 
 			By("Verifying a Deployment is created")
 			deployLookupKey := types.NamespacedName{Name: ts.Name, Namespace: ns.Name}
@@ -2021,8 +2023,8 @@ var _ = Describe("TaskSpawner Controller", func() {
 				err := k8sClient.Get(ctx, tsLookupKey, createdTS)
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
-			Expect(createdTS.Spec.When.GitHubIssues.TriggerComment).To(Equal("/kelos pick-up"))
-			Expect(createdTS.Spec.When.GitHubIssues.ExcludeComments).To(BeEmpty())
+			Expect(createdTS.Spec.When.GitHubIssues.CommentPolicy.TriggerComment).To(Equal("/kelos pick-up"))
+			Expect(createdTS.Spec.When.GitHubIssues.CommentPolicy.ExcludeComments).To(BeEmpty())
 
 			By("Verifying a Deployment is created")
 			deployLookupKey := types.NamespacedName{Name: ts.Name, Namespace: ns.Name}
@@ -2092,8 +2094,8 @@ var _ = Describe("TaskSpawner Controller", func() {
 				err := k8sClient.Get(ctx, tsLookupKey, createdTS)
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
-			Expect(createdTS.Spec.When.GitHubIssues.TriggerComment).To(BeEmpty())
-			Expect(createdTS.Spec.When.GitHubIssues.ExcludeComments).To(ConsistOf("/kelos needs-input"))
+			Expect(createdTS.Spec.When.GitHubIssues.CommentPolicy.TriggerComment).To(BeEmpty())
+			Expect(createdTS.Spec.When.GitHubIssues.CommentPolicy.ExcludeComments).To(ConsistOf("/kelos needs-input"))
 
 			By("Verifying a Deployment is created")
 			deployLookupKey := types.NamespacedName{Name: ts.Name, Namespace: ns.Name}
@@ -2367,8 +2369,8 @@ var _ = Describe("TaskSpawner Controller", func() {
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
 			Expect(createdTS.Spec.When.GitHubPullRequests.ReviewState).To(Equal("changes_requested"))
-			Expect(createdTS.Spec.When.GitHubPullRequests.TriggerComment).To(Equal("/kelos pick-up"))
-			Expect(createdTS.Spec.When.GitHubPullRequests.ExcludeComments).To(ConsistOf("/kelos needs-input"))
+			Expect(createdTS.Spec.When.GitHubPullRequests.CommentPolicy.TriggerComment).To(Equal("/kelos pick-up"))
+			Expect(createdTS.Spec.When.GitHubPullRequests.CommentPolicy.ExcludeComments).To(ConsistOf("/kelos needs-input"))
 			Expect(createdTS.Spec.When.GitHubPullRequests.Labels).To(ConsistOf("generated-by-kelos"))
 			Expect(createdTS.Spec.When.GitHubPullRequests.Draft).ToNot(BeNil())
 			Expect(*createdTS.Spec.When.GitHubPullRequests.Draft).To(BeFalse())
@@ -2443,8 +2445,9 @@ var _ = Describe("TaskSpawner Controller", func() {
 				err := k8sClient.Get(ctx, tsLookupKey, createdTS)
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
+			// Per-source pollInterval is retained; the deprecated root
+			// pollInterval is dropped by the v1alpha1->v1alpha2 conversion.
 			Expect(createdTS.Spec.When.GitHubIssues.PollInterval).To(Equal("30s"))
-			Expect(createdTS.Spec.PollInterval).To(Equal("5m"))
 		})
 	})
 })

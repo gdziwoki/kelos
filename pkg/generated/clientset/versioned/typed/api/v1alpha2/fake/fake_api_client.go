@@ -32,6 +32,18 @@ func (c *FakeApiV1alpha2) AgentConfigs(namespace string) v1alpha2.AgentConfigInt
 	return newFakeAgentConfigs(c, namespace)
 }
 
+func (c *FakeApiV1alpha2) Tasks(namespace string) v1alpha2.TaskInterface {
+	return newFakeTasks(c, namespace)
+}
+
+func (c *FakeApiV1alpha2) TaskSpawners(namespace string) v1alpha2.TaskSpawnerInterface {
+	return newFakeTaskSpawners(c, namespace)
+}
+
+func (c *FakeApiV1alpha2) Workspaces(namespace string) v1alpha2.WorkspaceInterface {
+	return newFakeWorkspaces(c, namespace)
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeApiV1alpha2) RESTClient() rest.Interface {

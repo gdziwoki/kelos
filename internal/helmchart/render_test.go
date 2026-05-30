@@ -179,14 +179,17 @@ func TestRender_TaskSpawnerTemplatePlaceholdersRemainLiteral(t *testing.T) {
 	if !strings.Contains(output, `Supports Go text/template variables from the work item, e.g. "kelos-task-{{.Number}}".`) {
 		t.Error("expected branch placeholder example to remain literal in rendered CRD output")
 	}
+	// Each placeholder appears in the Branch and PromptTemplate godoc of
+	// TaskTemplate, which is present in both the v1alpha1 and v1alpha2
+	// TaskSpawner CRD schemas (2 fields x 2 versions = 4).
 	for _, expected := range []string{
 		"Available variables (all sources): {{.ID}}, {{.Title}}, {{.Kind}}",
 		"GitHub issue/Jira sources: {{.Number}}, {{.Body}}, {{.URL}}, {{.Labels}}, {{.Comments}}",
 		"GitHub pull request sources additionally expose: {{.Branch}}, {{.ReviewState}}, {{.ReviewComments}}",
 		"Cron sources: {{.Time}}, {{.Schedule}}",
 	} {
-		if count := strings.Count(output, expected); count != 2 {
-			t.Errorf("expected %q to appear twice in TaskSpawner CRD descriptions, got %d", expected, count)
+		if count := strings.Count(output, expected); count != 4 {
+			t.Errorf("expected %q to appear four times in TaskSpawner CRD descriptions, got %d", expected, count)
 		}
 	}
 }

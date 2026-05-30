@@ -859,9 +859,9 @@ func TestVersionCommand(t *testing.T) {
 
 // kelosListKinds maps kelos GVRs to their list kinds for the fake dynamic client.
 var kelosListKinds = map[schema.GroupVersionResource]string{
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "tasks"}:        "TaskList",
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "taskspawners"}: "TaskSpawnerList",
-	{Group: "kelos.dev", Version: "v1alpha1", Resource: "workspaces"}:   "WorkspaceList",
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "tasks"}:        "TaskList",
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "taskspawners"}: "TaskSpawnerList",
+	{Group: "kelos.dev", Version: "v1alpha2", Resource: "workspaces"}:   "WorkspaceList",
 	{Group: "kelos.dev", Version: "v1alpha2", Resource: "agentconfigs"}: "AgentConfigList",
 }
 
@@ -878,14 +878,14 @@ func TestDeleteAllCustomResources_DeletesExistingResources(t *testing.T) {
 
 	task := &unstructured.Unstructured{}
 	task.SetGroupVersionKind(schema.GroupVersionKind{
-		Group: "kelos.dev", Version: "v1alpha1", Kind: "Task",
+		Group: "kelos.dev", Version: "v1alpha2", Kind: "Task",
 	})
 	task.SetName("my-task")
 	task.SetNamespace("default")
 
 	workspace := &unstructured.Unstructured{}
 	workspace.SetGroupVersionKind(schema.GroupVersionKind{
-		Group: "kelos.dev", Version: "v1alpha1", Kind: "Workspace",
+		Group: "kelos.dev", Version: "v1alpha2", Kind: "Workspace",
 	})
 	workspace.SetName("my-workspace")
 	workspace.SetNamespace("default")
@@ -896,7 +896,7 @@ func TestDeleteAllCustomResources_DeletesExistingResources(t *testing.T) {
 	}
 
 	// Verify resources were deleted
-	taskGVR := schema.GroupVersionResource{Group: "kelos.dev", Version: "v1alpha1", Resource: "tasks"}
+	taskGVR := schema.GroupVersionResource{Group: "kelos.dev", Version: "v1alpha2", Resource: "tasks"}
 	list, err := client.Resource(taskGVR).Namespace("default").List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error listing tasks: %v", err)
@@ -905,7 +905,7 @@ func TestDeleteAllCustomResources_DeletesExistingResources(t *testing.T) {
 		t.Errorf("expected 0 tasks, got %d", len(list.Items))
 	}
 
-	wsGVR := schema.GroupVersionResource{Group: "kelos.dev", Version: "v1alpha1", Resource: "workspaces"}
+	wsGVR := schema.GroupVersionResource{Group: "kelos.dev", Version: "v1alpha2", Resource: "workspaces"}
 	list, err = client.Resource(wsGVR).Namespace("default").List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error listing workspaces: %v", err)
@@ -921,7 +921,7 @@ func TestDeleteAllCustomResources_SkipsAlreadyDeletingResources(t *testing.T) {
 	now := metav1.Now()
 	task := &unstructured.Unstructured{}
 	task.SetGroupVersionKind(schema.GroupVersionKind{
-		Group: "kelos.dev", Version: "v1alpha1", Kind: "Task",
+		Group: "kelos.dev", Version: "v1alpha2", Kind: "Task",
 	})
 	task.SetName("deleting-task")
 	task.SetNamespace("default")
@@ -936,7 +936,7 @@ func TestDeleteAllCustomResources_SkipsAlreadyDeletingResources(t *testing.T) {
 
 	// Resource should still exist because it was already deleting (has deletionTimestamp)
 	// and we skip those
-	taskGVR := schema.GroupVersionResource{Group: "kelos.dev", Version: "v1alpha1", Resource: "tasks"}
+	taskGVR := schema.GroupVersionResource{Group: "kelos.dev", Version: "v1alpha2", Resource: "tasks"}
 	list, err := client.Resource(taskGVR).Namespace("default").List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error listing tasks: %v", err)
@@ -960,7 +960,7 @@ func TestWaitForCustomResourceDeletion_RespectsContextCancellation(t *testing.T)
 
 	task := &unstructured.Unstructured{}
 	task.SetGroupVersionKind(schema.GroupVersionKind{
-		Group: "kelos.dev", Version: "v1alpha1", Kind: "Task",
+		Group: "kelos.dev", Version: "v1alpha2", Kind: "Task",
 	})
 	task.SetName("stuck-task")
 	task.SetNamespace("default")

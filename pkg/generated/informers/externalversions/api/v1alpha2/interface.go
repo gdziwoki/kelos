@@ -26,6 +26,12 @@ import (
 type Interface interface {
 	// AgentConfigs returns a AgentConfigInformer.
 	AgentConfigs() AgentConfigInformer
+	// Tasks returns a TaskInformer.
+	Tasks() TaskInformer
+	// TaskSpawners returns a TaskSpawnerInformer.
+	TaskSpawners() TaskSpawnerInformer
+	// Workspaces returns a WorkspaceInformer.
+	Workspaces() WorkspaceInformer
 }
 
 type version struct {
@@ -42,4 +48,19 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // AgentConfigs returns a AgentConfigInformer.
 func (v *version) AgentConfigs() AgentConfigInformer {
 	return &agentConfigInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Tasks returns a TaskInformer.
+func (v *version) Tasks() TaskInformer {
+	return &taskInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// TaskSpawners returns a TaskSpawnerInformer.
+func (v *version) TaskSpawners() TaskSpawnerInformer {
+	return &taskSpawnerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Workspaces returns a WorkspaceInformer.
+func (v *version) Workspaces() WorkspaceInformer {
+	return &workspaceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
