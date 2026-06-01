@@ -114,6 +114,25 @@ kubectl create secret generic gemini-credentials \
 
 When `spec.credentials.type` is `none`, no secret is required; supply credentials via `spec.podOverrides.env` (e.g., for Bedrock, Vertex AI, or Azure OpenAI). For details on how these variables are consumed by agent containers, see [Agent Image Interface](agent-image-interface.md).
 
+### Codex OAuth Token Refresh
+
+A `codex` `oauth` credential (`CODEX_AUTH_JSON`) is a ChatGPT-mode bundle carrying a short-lived `access_token` plus a long-lived `refresh_token`. Agent pods are ephemeral and never persist a refreshed bundle back to the Secret, so if no task runs for a while the access token expires, and if no task runs for longer than the refresh token's idle lifetime the bundle can no longer be refreshed at all.
+
+Kelos ships an opt-in CronJob that refreshes these bundles independently of agent activity. Enable it in the Helm values and label each credentials Secret to opt in:
+
+```yaml
+# values.yaml
+codexAuthRefresher:
+  enabled: true
+  schedule: "0 */6 * * *"
+```
+
+```bash
+kubectl label secret codex-credentials kelos.dev/codex-oauth-refresh=true
+```
+
+The CronJob runs under the controller's ServiceAccount (Secret writes stay off agent pods), performs the OAuth2 `refresh_token` grant directly, and writes the refreshed bundle back to only the `CODEX_AUTH_JSON` key of each labeled Secret — other keys are preserved and the token is never logged. Secrets without a `CODEX_AUTH_JSON` bundle, or whose bundle carries no `refresh_token` (e.g. API-key credentials), are skipped. Externally-managed Secrets (ExternalSecrets, Vault, sealed-secrets) will overwrite the refreshed value on their next sync and are not supported.
+
 ## Workspace
 
 | Field | Description | Required |

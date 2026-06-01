@@ -44,3 +44,49 @@ spec:
                   cpu: 10m
                   memory: 32Mi
 {{- end }}
+{{- if .Values.codexAuthRefresher.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kelos-codex-auth-refresher
+  namespace: kelos-system
+  labels:
+    app.kubernetes.io/name: kelos
+    app.kubernetes.io/component: codex-auth-refresher
+spec:
+  schedule: {{ .Values.codexAuthRefresher.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          serviceAccountName: kelos-controller
+          securityContext:
+            runAsNonRoot: true
+          restartPolicy: OnFailure
+          containers:
+            - name: codex-auth-refresher
+              image: {{ .Values.controllerImage }}{{- if .Values.image.tag }}:{{ .Values.image.tag }}{{- end }}
+              {{- if .Values.image.pullPolicy }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              {{- end }}
+              args:
+                - --codex-auth-refresh
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+{{- end }}

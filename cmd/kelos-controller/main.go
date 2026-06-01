@@ -19,6 +19,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	kelosv1alpha1 "github.com/kelos-dev/kelos/api/v1alpha1"
+	"github.com/kelos-dev/kelos/internal/codexauth"
 	"github.com/kelos-dev/kelos/internal/controller"
 	"github.com/kelos-dev/kelos/internal/githubapp"
 	"github.com/kelos-dev/kelos/internal/logging"
@@ -61,6 +62,10 @@ func main() {
 	var telemetryReport bool
 	var telemetryEndpoint string
 	var telemetryEnvironment string
+	var codexAuthRefresh bool
+	var codexAuthRefreshNamespace string
+	var codexAuthTokenEndpoint string
+	var codexAuthClientID string
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -89,6 +94,10 @@ func main() {
 	flag.BoolVar(&telemetryReport, "telemetry-report", false, "Run a one-shot telemetry report and exit.")
 	flag.StringVar(&telemetryEndpoint, "telemetry-endpoint", telemetry.DefaultPostHogEndpoint, "The PostHog endpoint for sending telemetry reports.")
 	flag.StringVar(&telemetryEnvironment, "telemetry-environment", "production", "The environment label for telemetry reports (e.g., production, development).")
+	flag.BoolVar(&codexAuthRefresh, "codex-auth-refresh", false, "Run a one-shot refresh of opted-in Codex OAuth credentials Secrets and exit.")
+	flag.StringVar(&codexAuthRefreshNamespace, "codex-auth-refresh-namespace", "", "Limit the Codex OAuth refresh to a single namespace. Empty means all namespaces.")
+	flag.StringVar(&codexAuthTokenEndpoint, "codex-auth-token-endpoint", codexauth.DefaultTokenEndpoint, "The OAuth2 token endpoint used to refresh Codex credentials.")
+	flag.StringVar(&codexAuthClientID, "codex-auth-client-id", codexauth.DefaultClientID, "The OAuth2 client_id used to refresh Codex credentials.")
 
 	opts, applyVerbosity := logging.SetupZapOptions(flag.CommandLine)
 	flag.Parse()
@@ -161,6 +170,29 @@ func main() {
 		defer cancel()
 		if err := telemetry.Run(ctx, log, c, clientset, phClient, telemetryEnvironment); err != nil {
 			setupLog.Error(err, "Telemetry report failed")
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
+	if codexAuthRefresh {
+		log := ctrl.Log.WithName("codex-auth-refresh")
+		cfg := ctrl.GetConfigOrDie()
+
+		clientset, err := kubernetes.NewForConfig(cfg)
+		if err != nil {
+			setupLog.Error(err, "Unable to create clientset for Codex auth refresh")
+			os.Exit(1)
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		if err := codexauth.Run(ctx, log, clientset, codexauth.Options{
+			Namespace:     codexAuthRefreshNamespace,
+			TokenEndpoint: codexAuthTokenEndpoint,
+			ClientID:      codexAuthClientID,
+		}); err != nil {
+			setupLog.Error(err, "Codex auth refresh failed")
 			os.Exit(1)
 		}
 		os.Exit(0)

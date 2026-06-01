@@ -9,6 +9,13 @@ image:
 telemetry:
   enabled: true
 
+# codexAuthRefresher runs a scheduled CronJob that refreshes Codex (OpenAI)
+# OAuth credentials stored in Secrets labeled kelos.dev/codex-oauth-refresh=true,
+# keeping them valid even when no agent task runs for a while. Opt-in.
+codexAuthRefresher:
+  enabled: false
+  schedule: "0 */6 * * *"
+
 controllerImage: ghcr.io/kelos-dev/kelos-controller
 ghproxy:
   image: ghcr.io/kelos-dev/ghproxy
