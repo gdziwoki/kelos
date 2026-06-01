@@ -32,7 +32,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -165,20 +164,19 @@ func refreshSecret(ctx context.Context, log logr.Logger, clientset kubernetes.In
 		return false, nil
 	}
 
-	// Patch only the CODEX_AUTH_JSON key so other keys in the Secret are
-	// preserved. A strategic-merge patch on a single data key is the smallest
-	// possible mutation.
-	patch, err := json.Marshal(map[string]any{
-		"data": map[string][]byte{secretKey: updated},
-	})
-	if err != nil {
-		return false, fmt.Errorf("building Secret patch: %w", err)
+	// Write back via read-modify-Update on the Secret already held from the
+	// List. Mutating only the CODEX_AUTH_JSON key preserves the other keys,
+	// and Update (rather than Patch) matches the verbs the controller
+	// ServiceAccount is granted (get/list/update); it has no patch verb.
+	if s.Data == nil {
+		s.Data = map[string][]byte{}
 	}
-	if _, err := clientset.CoreV1().Secrets(s.Namespace).Patch(ctx, s.Name, types.StrategicMergePatchType, patch, metav1.PatchOptions{}); err != nil {
+	s.Data[secretKey] = updated
+	if _, err := clientset.CoreV1().Secrets(s.Namespace).Update(ctx, s, metav1.UpdateOptions{}); err != nil {
 		if apierrors.IsNotFound(err) {
 			return false, fmt.Errorf("secret no longer exists: %w", err)
 		}
-		return false, fmt.Errorf("patching Secret: %w", err)
+		return false, fmt.Errorf("updating Secret: %w", err)
 	}
 
 	log.Info("Refreshed Codex OAuth credential", "namespace", s.Namespace, "name", s.Name)
